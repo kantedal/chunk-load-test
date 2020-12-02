@@ -1,24 +1,61 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import React, { lazy, Suspense } from "react";
+import { Link, Redirect, Route, Switch } from "react-router-dom";
+import retry from "./retry";
+
+const importComponent = async (lazyComponent: any) => {
+  try {
+    const component = await lazyComponent();
+    console.log("imported", component.default);
+    return component;
+  } catch (e) {
+    console.log(e);
+  }
+};
+
+const A = lazy(() => retry(() => import("./routes/A")));
+const B = lazy(() => retry(() => import("./routes/B")));
+
+// const A = React.lazy(() => componentLoader(() => import("./routes/A"), 5));
+// const B = React.lazy(() => componentLoader(() => import("./routes/B"), 5));
+
+// const A = React.lazy(() => import("./routes/A"));
+// const B = React.lazy(() => import("./routes/B"));
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div style={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      <div
+        style={{
+          flex: "none",
+          display: "flex",
+          justifyContent: "center",
+          marginBottom: 10,
+          marginTop: 10,
+        }}
+      >
+        <Link to="/a">
+          <button>Page A</button>
+        </Link>
+        <div style={{ width: 10 }} />
+        <Link to="/b">
+          <button>Page B</button>
+        </Link>
+      </div>
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Suspense fallback={<div>Loading</div>}>
+          <Switch>
+            <Route component={A} path="/a" />
+            <Route component={B} path="/b" />
+            <Redirect to="/a" />
+          </Switch>
+        </Suspense>
+      </div>
     </div>
   );
 }
